@@ -6,7 +6,6 @@ import yfinance as yf
 import uuid
 # import time
 import time as t
-import pytz
 # Import the required libraries
 from keras._tf_keras.keras.models import  load_model
 from sklearn.preprocessing import MinMaxScaler 
@@ -17,7 +16,6 @@ import plotly.graph_objects as go
 import streamlit as st
 
 # Import evaluate library
-from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, root_mean_squared_error, mean_absolute_error
 
 # Valid intervals: [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo]
 
@@ -185,7 +183,7 @@ class Dashboard :
             date_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             # Unpack the data
             history_df = BitcoinData.fetchRealTimeData(crypto_ticker, period, interval, lookback).map('{:.2f}'.format)
-            future_predictions_df = Prediction.runPredictionModel(model, history_df, time, interval, lookback)
+            future_predictions_df = Prediction.runPredictionModel(model, history_df, time, interval, lookback).sort_index(ascending=False)
             # Check if the data is not None
             if history_df is not None and future_predictions_df is not None:
                 # Add a title to the crypto prediction graph
@@ -201,7 +199,7 @@ class Dashboard :
                     st.markdown("**Bitcoin Prediction**")
         
                     # st.plotly_chart(fig, use_container_width=True)
-
+                    st.markdown("Click fullscreen to see the table details!")
                     # Create data table of future
                     fig = go.Figure(
                         data=[
@@ -211,10 +209,19 @@ class Dashboard :
                             ),
                         ]
                     )
+
+                    # Atur ukuran figure agar tidak terlalu besar
+                    fig.update_layout(
+                        height=250,  # Tinggi figure dalam piksel
+                        width=200    # Lebar figure dalam piksel
+                    )
+
                     # Generate a random key for this table
                     random_key_chart_2 = str(uuid.uuid4())
                     st.plotly_chart(fig, use_container_width=True, key=random_key_chart_2)
                     # st.plotly_chart(fig, use_container_width=True)
+                    st.markdown("Click fullscreen to see the graph details!")
+                    
                     fig = go.Figure(
                         data=[
                             go.Scatter(
@@ -250,11 +257,11 @@ class Dashboard :
                 st.markdown("### **No data available**")
 
             #####Bitcoin Prediction Graph End#####
-            t.sleep(1)
+            t.sleep(60)
 
 if __name__ == '__main__': 
     # dashboard = Dashboard()
     # dashboard.run()
     Dashboard.run()
-        
-        
+
+
